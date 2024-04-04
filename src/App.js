@@ -10,14 +10,23 @@ const App = () => {
       try {
         const xResponse = await axios.get('https://retoolapi.dev/o5zMs5/data');
         const yResponse = await axios.get('https://retoolapi.dev/gDa8uC/data');
-        const xData = xResponse.data.slice(0, 50).map(entry => parseFloat(entry.RandomNumber));
+        
+        // Processing x-axis data
+        const xData = xResponse.data.slice(0, 50).map(entry => ({
+          id: parseInt(entry.id),
+          x: parseFloat(entry.RandomNumber)
+        }));
+        
+        // Processing y-axis data
         const yData = yResponse.data.slice(0, 50).map(entry => parseFloat(entry.RandomNumber));
-
-        const data = xData.map((value, index) => ({
-          x: value,
+        
+        // Combine x and y data
+        const data = xData.map((entry, index) => ({
+          id: entry.id,
+          x: entry.x,
           y: yData[index]
         }));
-
+        
         setChartData(data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -28,17 +37,23 @@ const App = () => {
   }, []);
 
   return (
-    <div>
-      <h1>Chart of X vs Y</h1>
-      <div style={{height: '400px', width: '600px'}}>
-        <LineChart width={600} height={400} data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="x" type="number" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="y" stroke="#8884d8" />
-        </LineChart>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div style={{ width: '80%' }}>
+        <h1 style={{ textAlign: 'center' }}>Chart of X vs Y</h1>
+        <div style={{ height: '400px' }}>
+          <LineChart width={800} height={400} data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="id" 
+              type="number"
+              tickFormatter={(id) => id === chartData[chartData.length - 1]?.id ? 'x1' : id} 
+            />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="y" stroke="#8884d8" />
+          </LineChart>
+        </div>
       </div>
     </div>
   );
